@@ -1,6 +1,5 @@
 function buildMelodySong(notesArr, lyricsLines, tempoSecPerBeat = 0.5) {
-  const notes = [];
-  const lyrics = [];
+  const notes = [], lyrics = [];
   let t = 1.5;
   notesArr.forEach(([midi, beats], idx) => {
     const dur = beats * tempoSecPerBeat;
@@ -65,16 +64,17 @@ const state = {
   micGain: 1.0,
   micEcho: 0.25,
   micReverb: 0.30,
+  eqGains: [0, 0, 0, 0, 0],
   pitchSamples: [],
   records: []
 };
 
 try {
-  const saved = localStorage.getItem('lso_glass_records');
+  const saved = localStorage.getItem('singokey_records');
   if (saved) state.records = JSON.parse(saved);
 } catch (e) {}
 
-let audioCtx = null, masterGain = null, analyser = null, htmlAudio = null;
+let audioCtx = null, masterGain = null, analyser = null, htmlAudio = null, eqFilters = [];
 let micStream = null, micAnalyser = null, micGainNode = null, micEchoGain = null, micReverbGain = null;
 let nextNoteIdx = 0, lastFrameTs = 0, rafId = null;
 
@@ -84,12 +84,40 @@ function ensureAudio() {
     audioCtx = new AC();
     masterGain = audioCtx.createGain();
     masterGain.gain.value = state.musicVol * 0.45;
+    const freqs = [60, 230, 910, 3600, 14000];
+    eqFilters = freqs.map((f, i) => {
+      const bq = audioCtx.createBiquadFilter();
+      bq.type = i === 0 ? 'lowshelf' : i === 4 ? 'highshelf' : 'peaking';
+      bq.frequency.value = f;
+      bq.gain.value = state.eqGains[i] || 0;
+      return bq;
+    });
     analyser = audioCtx.createAnalyser();
     analyser.fftSize = 128;
-    masterGain.connect(analyser);
+    let node = masterGain;
+    eqFilters.forEach(f => { node.connect(f); node = f; });
+    node.connect(analyser);
     analyser.connect(audioCtx.destination);
   }
   if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+
+function setEqBand(idx, val) {
+  const db = parseFloat(val);
+  state.eqGains[idx] = db;
+  const lbl = document.getElementById('eqVal' + idx);
+  if (lbl) lbl.textContent = (db > 0 ? '+' : '') + db + 'dB';
+  if (eqFilters[idx]) eqFilters[idx].gain.value = db;
+}
+
+function applyEqPreset(name) {
+  const presets = { flat: [0,0,0,0,0], karaoke: [-2,1,4,5,2], bass: [7,4,0,-1,1], concert: [3,1,-1,3,5] };
+  const vals = presets[name] || presets.flat;
+  const sliders = document.querySelectorAll('.eq-band');
+  vals.forEach((v, i) => {
+    if (sliders[i]) sliders[i].value = v;
+    setEqBand(i, v);
+  });
 }
 
 function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
@@ -104,8 +132,7 @@ function playMidiNote(midi, durSec, ch, vel) {
   if (ch === 0 && !state.melodyOn) return;
   const now = audioCtx.currentTime;
   if (ch === 9) {
-    const osc = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
+    const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
     osc.type = 'triangle';
     osc.frequency.setValueAtTime(midi < 40 ? 110 : 280, now);
     osc.frequency.exponentialRampToValueAtTime(35, now + 0.08);
@@ -116,8 +143,7 @@ function playMidiNote(midi, durSec, ch, vel) {
     return;
   }
   const freq = midiToFreq(midi + state.keyShift);
-  const osc = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+  const osc = audioCtx.createOscillator(), g = audioCtx.createGain();
   osc.type = ch === 0 ? 'triangle' : (ch === 2 ? 'sine' : 'sawtooth');
   osc.frequency.setValueAtTime(freq, now);
   const gainAmt = (vel / 127) * (ch === 0 ? 0.26 : 0.10);
@@ -131,22 +157,16 @@ function playMidiNote(midi, durSec, ch, vel) {
 
 function playBeep(freq = 660, dur = 0.08, type = 'sine') {
   ensureAudio();
-  const now = audioCtx.currentTime;
-  const o = audioCtx.createOscillator();
-  const g = audioCtx.createGain();
+  const now = audioCtx.currentTime, o = audioCtx.createOscillator(), g = audioCtx.createGain();
   o.type = type; o.frequency.setValueAtTime(freq, now);
-  g.gain.setValueAtTime(0.18, now);
-  g.gain.exponentialRampToValueAtTime(0.001, now + dur);
-  o.connect(g); g.connect(masterGain);
-  o.start(now); o.stop(now + dur + 0.01);
+  g.gain.setValueAtTime(0.18, now); g.gain.exponentialRampToValueAtTime(0.001, now + dur);
+  o.connect(g); g.connect(masterGain); o.start(now); o.stop(now + dur + 0.01);
 }
 
 function showToast(msg) {
-  const box = document.getElementById('toastBox');
-  const el = document.createElement('div');
+  const box = document.getElementById('toastBox'), el = document.createElement('div');
   el.className = 'glass-strong px-3.5 py-2.5 rounded-xl text-xs font-medium text-white shadow-xl border border-white/25';
-  el.textContent = msg;
-  box.appendChild(el);
+  el.textContent = msg; box.appendChild(el);
   setTimeout(() => el.remove(), 2800);
 }
 
@@ -156,12 +176,20 @@ function switchTab(tabId) {
   document.querySelectorAll('.nav-tab').forEach(btn => {
     const active = btn.dataset.tab === tabId;
     btn.className = active
-      ? 'nav-tab glass-btn-primary text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap'
-      : 'nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap';
+      ? 'nav-tab glass-btn-primary text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap'
+      : 'nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap';
   });
   if (tabId === 'arcade') { resizeArcadeCanvases(); renderRecords(); }
 }
 document.querySelectorAll('.nav-tab').forEach(b => b.addEventListener('click', () => switchTab(b.dataset.tab)));
+
+function updateMarquee() {
+  const s = state.currentSong;
+  const nowEl = document.getElementById('marqueeNow');
+  const nextEl = document.getElementById('marqueeNext');
+  if (nowEl && s) nowEl.textContent = `${s.id} • ${s.title} — ${s.artist}`;
+  if (nextEl) nextEl.textContent = state.queue.length ? `${state.queue[0].id} • ${state.queue[0].title}` : 'Reserve a track in Songbook or Remote';
+}
 
 function loadSong(song, autoPlay = true) {
   stopSong(false);
@@ -172,6 +200,7 @@ function loadSong(song, autoPlay = true) {
   document.getElementById('stageSongCode').textContent = song.id;
   document.getElementById('stageTitle').textContent = song.title;
   document.getElementById('stageArtist').textContent = `${song.artist} • ${song.lang}`;
+  updateMarquee();
   const dur = song.audioUrl ? (song.duration || 180) : song.data.duration;
   document.getElementById('seekSlider').max = dur;
   document.getElementById('seekSlider').value = 0;
@@ -180,8 +209,7 @@ function loadSong(song, autoPlay = true) {
   updateLyricsUI(0);
   if (song.audioUrl) {
     if (!htmlAudio) htmlAudio = new Audio();
-    htmlAudio.src = song.audioUrl;
-    htmlAudio.volume = state.musicVol;
+    htmlAudio.src = song.audioUrl; htmlAudio.volume = state.musicVol;
   }
   if (autoPlay) startPlayback();
 }
@@ -207,15 +235,11 @@ function togglePlay() {
     state.isPlaying = false;
     document.getElementById('playPauseText').textContent = 'Play';
     if (htmlAudio) htmlAudio.pause();
-  } else {
-    startPlayback();
-  }
+  } else startPlayback();
 }
 
 function stopSong(resetUi = true) {
-  state.isPlaying = false;
-  state.currentTime = 0;
-  nextNoteIdx = 0;
+  state.isPlaying = false; state.currentTime = 0; nextNoteIdx = 0;
   if (htmlAudio) { htmlAudio.pause(); htmlAudio.currentTime = 0; }
   if (resetUi) {
     document.getElementById('playPauseText').textContent = 'Play';
@@ -225,78 +249,46 @@ function stopSong(resetUi = true) {
   }
 }
 
-function replaySong() {
-  state.currentTime = 0;
-  nextNoteIdx = 0;
-  startPlayback();
-  showToast('Replaying ' + state.currentSong.title);
-}
-
+function replaySong() { state.currentTime = 0; nextNoteIdx = 0; startPlayback(); showToast('Replaying ' + state.currentSong.title); }
 function skipSong() {
   if (state.queue.length > 0) {
-    const next = state.queue.shift();
-    renderQueue();
-    loadSong(next, true);
-    showToast('Now Playing: ' + next.title);
+    const next = state.queue.shift(); renderQueue(); loadSong(next, true); showToast('Now Playing: ' + next.title);
   } else {
     const idx = SONGS.findIndex(s => s.id === state.currentSong.id);
     const next = SONGS[(idx + 1) % SONGS.length];
-    loadSong(next, true);
-    showToast('Playing next: ' + next.title);
+    loadSong(next, true); showToast('Playing next: ' + next.title);
   }
 }
 
-function formatTime(s) {
-  s = Math.max(0, Math.floor(s));
-  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-}
+function formatTime(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
 
 function getLyricLines(lyricsArr) {
-  const lines = [];
-  let cur = [];
+  const lines = []; let cur = [];
   for (const [t, raw] of lyricsArr) {
     const clean = raw.replace(/\r/g, '\n');
     if (clean.startsWith('/') || clean.startsWith('\\') || clean.startsWith('\n')) {
       if (cur.length) lines.push(cur);
       cur = [[t, clean.replace(/^[/\\\n]+/, '')]];
-    } else {
-      cur.push([t, clean]);
-    }
+    } else cur.push([t, clean]);
   }
   if (cur.length) lines.push(cur);
   return lines;
 }
 
 function updateLyricsUI(timeSec) {
-  const song = state.currentSong;
-  const lyrics = song.lyrics || (song.data && song.data.lyrics) || [];
-  const curEl = document.getElementById('lyricCurrent');
-  const nextEl = document.getElementById('lyricNext');
-  const cdEl = document.getElementById('countdownBadge');
-  if (!lyrics.length) {
-    curEl.textContent = song.title;
-    nextEl.textContent = 'Instrumental / No lyrics loaded';
-    cdEl.classList.add('hidden');
-    return;
-  }
-  const adjTime = timeSec + state.lyricOffset;
-  const firstT = lyrics[0][0];
+  const song = state.currentSong, lyrics = song.lyrics || (song.data && song.data.lyrics) || [];
+  const curEl = document.getElementById('lyricCurrent'), nextEl = document.getElementById('lyricNext'), cdEl = document.getElementById('countdownBadge');
+  if (!lyrics.length) { curEl.textContent = song.title; nextEl.textContent = 'Instrumental / No lyrics loaded'; cdEl.classList.add('hidden'); return; }
+  const adjTime = timeSec + state.lyricOffset, firstT = lyrics[0][0];
   if (state.isPlaying && adjTime < firstT && firstT - adjTime <= 3.5) {
-    cdEl.classList.remove('hidden');
-    cdEl.textContent = 'GET READY • ' + Math.ceil(firstT - adjTime);
-  } else {
-    cdEl.classList.add('hidden');
-  }
+    cdEl.classList.remove('hidden'); cdEl.textContent = 'GET READY • ' + Math.ceil(firstT - adjTime);
+  } else cdEl.classList.add('hidden');
   const lines = getLyricLines(lyrics);
   let activeLineIdx = 0;
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i][0][0] <= adjTime + 0.25) activeLineIdx = i;
-  }
-  const line = lines[activeLineIdx] || [];
-  const nextLine = lines[activeLineIdx + 1] || [];
+  for (let i = 0; i < lines.length; i++) if (lines[i][0][0] <= adjTime + 0.25) activeLineIdx = i;
+  const line = lines[activeLineIdx] || [], nextLine = lines[activeLineIdx + 1] || [];
   curEl.innerHTML = line.map(([t, txt]) => {
-    const sung = t <= adjTime;
-    const safe = txt.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const sung = t <= adjTime, safe = txt.replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return `<span class="${sung ? 'syllable-sung' : 'text-white/85'}">${safe}</span>`;
   }).join('');
   nextEl.textContent = nextLine.map(x => x[1]).join('').trim() || '♪ ♪ ♪';
@@ -316,35 +308,21 @@ async function toggleMic() {
   try {
     micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const src = audioCtx.createMediaStreamSource(micStream);
-    micGainNode = audioCtx.createGain();
-    micGainNode.gain.value = state.micGain;
-    micAnalyser = audioCtx.createAnalyser();
-    micAnalyser.fftSize = 1024;
-    const delay = audioCtx.createDelay(1.0);
-    delay.delayTime.value = 0.24;
-    micEchoGain = audioCtx.createGain();
-    micEchoGain.gain.value = state.micEcho;
-    const revDelay = audioCtx.createDelay(1.0);
-    revDelay.delayTime.value = 0.07;
-    micReverbGain = audioCtx.createGain();
-    micReverbGain.gain.value = state.micReverb;
-    src.connect(micGainNode);
-    micGainNode.connect(micAnalyser);
-    micGainNode.connect(delay);
-    delay.connect(micEchoGain);
-    micEchoGain.connect(delay);
-    micEchoGain.connect(audioCtx.destination);
-    micGainNode.connect(revDelay);
-    revDelay.connect(micReverbGain);
-    micReverbGain.connect(audioCtx.destination);
+    micGainNode = audioCtx.createGain(); micGainNode.gain.value = state.micGain;
+    micAnalyser = audioCtx.createAnalyser(); micAnalyser.fftSize = 1024;
+    const delay = audioCtx.createDelay(1.0); delay.delayTime.value = 0.24;
+    micEchoGain = audioCtx.createGain(); micEchoGain.gain.value = state.micEcho;
+    const revDelay = audioCtx.createDelay(1.0); revDelay.delayTime.value = 0.07;
+    micReverbGain = audioCtx.createGain(); micReverbGain.gain.value = state.micReverb;
+    src.connect(micGainNode); micGainNode.connect(micAnalyser);
+    micGainNode.connect(delay); delay.connect(micEchoGain); micEchoGain.connect(delay); micEchoGain.connect(audioCtx.destination);
+    micGainNode.connect(revDelay); revDelay.connect(micReverbGain); micReverbGain.connect(audioCtx.destination);
     state.micActive = true;
     document.getElementById('micStageLabel').textContent = 'Mic ON';
     document.getElementById('btnMicSettings').textContent = 'Disable Mic';
     document.getElementById('micStatusText').textContent = 'Live & Active';
     showToast('Microphone enabled with Echo & Reverb FX');
-  } catch (e) {
-    showToast('Microphone permission denied or unavailable');
-  }
+  } catch (e) { showToast('Microphone permission denied or unavailable'); }
 }
 
 function detectPitchHz(buf, sampleRate) {
@@ -394,17 +372,15 @@ function drawStageVisualizer() {
   const ctx = c.getContext('2d');
   if (c.width !== c.clientWidth || c.height !== c.clientHeight) { c.width = c.clientWidth; c.height = c.clientHeight; }
   ctx.clearRect(0, 0, c.width, c.height);
-  const bars = 40;
-  const data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
+  const bars = 40, data = analyser ? new Uint8Array(analyser.frequencyBinCount) : null;
   if (analyser && state.isPlaying) analyser.getByteFrequencyData(data);
   const bw = c.width / bars;
   for (let i = 0; i < bars; i++) {
     const val = data && state.isPlaying ? data[i % data.length] / 255 : (0.1 + 0.08 * Math.sin(performance.now() * 0.003 + i * 0.4));
     const h = Math.max(4, val * c.height * 0.9);
     const grad = ctx.createLinearGradient(0, c.height - h, 0, c.height);
-    grad.addColorStop(0, '#38bdf8'); grad.addColorStop(1, '#c026d3');
-    ctx.fillStyle = grad;
-    ctx.fillRect(i * bw + 2, c.height - h, Math.max(2, bw - 4), h);
+    grad.addColorStop(0, '#38bdf8'); grad.addColorStop(1, '#e879f9');
+    ctx.fillStyle = grad; ctx.fillRect(i * bw + 2, c.height - h, Math.max(2, bw - 4), h);
   }
 }
 
@@ -424,47 +400,34 @@ function drawPitchBar() {
   }
   document.getElementById('targetNoteName').textContent = targetMidi ? midiToName(targetMidi) : '--';
   if (targetMidi) {
-    const norm = Math.max(0.1, Math.min(0.9, (targetMidi - 48) / 36));
-    const y = c.height * (1 - norm);
-    ctx.fillStyle = 'rgba(56, 189, 248, 0.35)';
-    ctx.fillRect(c.width * 0.15, y - 6, c.width * 0.7, 12);
-    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
-    ctx.strokeRect(c.width * 0.15, y - 6, c.width * 0.7, 12);
+    const norm = Math.max(0.1, Math.min(0.9, (targetMidi - 48) / 36)), y = c.height * (1 - norm);
+    ctx.fillStyle = 'rgba(56, 189, 248, 0.35)'; ctx.fillRect(c.width * 0.15, y - 6, c.width * 0.7, 12);
+    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2; ctx.strokeRect(c.width * 0.15, y - 6, c.width * 0.7, 12);
   }
   let micHz = 0, rms = 0;
   if (state.micActive && micAnalyser) {
-    const buf = new Float32Array(micAnalyser.fftSize);
-    micAnalyser.getFloatTimeDomainData(buf);
-    const res = detectPitchHz(buf, audioCtx.sampleRate);
-    micHz = res.hz; rms = res.rms;
+    const buf = new Float32Array(micAnalyser.fftSize); micAnalyser.getFloatTimeDomainData(buf);
+    const res = detectPitchHz(buf, audioCtx.sampleRate); micHz = res.hz; rms = res.rms;
     document.getElementById('micLevelBar').style.width = Math.min(100, rms * 450) + '%';
   }
   if (micHz > 60) {
     const micMidi = Math.round(69 + 12 * Math.log2(micHz / 440));
     document.getElementById('micNoteName').textContent = midiToName(micMidi);
-    const norm = Math.max(0.1, Math.min(0.9, (micMidi - 48) / 36));
-    const y = c.height * (1 - norm);
-    ctx.beginPath(); ctx.arc(c.width * 0.5, y, 7, 0, Math.PI * 2);
-    ctx.fillStyle = '#e879f9'; ctx.fill();
+    const norm = Math.max(0.1, Math.min(0.9, (micMidi - 48) / 36)), y = c.height * (1 - norm);
+    ctx.beginPath(); ctx.arc(c.width * 0.5, y, 7, 0, Math.PI * 2); ctx.fillStyle = '#e879f9'; ctx.fill();
     if (targetMidi && state.isPlaying) {
       const diff = Math.abs((micMidi % 12) - (targetMidi % 12));
       state.pitchSamples.push(diff <= 1 ? 100 : diff <= 2 ? 78 : 55);
     }
-  } else {
-    document.getElementById('micNoteName').textContent = '--';
-  }
+  } else document.getElementById('micNoteName').textContent = '--';
   const avg = state.pitchSamples.length ? Math.round(state.pitchSamples.reduce((a, b) => a + b, 0) / state.pitchSamples.length) : 0;
   document.getElementById('liveAccPct').textContent = avg + '%';
 }
 
 function spawnReaction(emoji) {
-  const stage = document.getElementById('stageCard');
-  const el = document.createElement('div');
-  el.className = 'reaction-float';
-  el.textContent = emoji;
-  el.style.left = (15 + Math.random() * 70) + '%';
-  stage.appendChild(el);
-  playBeep(740 + Math.random() * 200, 0.05, 'triangle');
+  const stage = document.getElementById('stageCard'), el = document.createElement('div');
+  el.className = 'reaction-float'; el.textContent = emoji; el.style.left = (15 + Math.random() * 70) + '%';
+  stage.appendChild(el); playBeep(740 + Math.random() * 200, 0.05, 'triangle');
   setTimeout(() => el.remove(), 2200);
 }
 
@@ -474,9 +437,7 @@ function triggerScoreReveal() {
   let finalScore = 88;
   if (state.scoringMode === 'voice' && state.pitchSamples.length > 5) {
     finalScore = Math.min(100, Math.max(58, Math.round(state.pitchSamples.reduce((a, b) => a + b, 0) / state.pitchSamples.length)));
-  } else {
-    finalScore = Math.floor(76 + Math.random() * 25);
-  }
+  } else finalScore = Math.floor(76 + Math.random() * 25);
   let greeting = 'Good try! Grab the mic and go again!', tier = 'Rising Star';
   if (finalScore === 100) { greeting = 'Perfect score! You are a superstar! Yay!'; tier = 'Legend 100'; }
   else if (finalScore >= 91) { greeting = 'Incredible performance! Almost perfection!'; tier = 'Superstar'; }
@@ -489,35 +450,28 @@ function triggerScoreReveal() {
   document.getElementById('scoreTierLabel').textContent = tier;
   document.getElementById('scoreModal').classList.remove('hidden');
 
-  let cur = 0;
-  const rollEl = document.getElementById('scoreRollNumber');
+  let cur = 0; const rollEl = document.getElementById('scoreRollNumber');
   const iv = setInterval(() => {
     cur = Math.min(finalScore, cur + Math.max(1, Math.ceil((finalScore - cur) / 5)));
-    rollEl.textContent = cur;
-    playBeep(360 + cur * 5, 0.04, 'triangle');
+    rollEl.textContent = cur; playBeep(360 + cur * 5, 0.04, 'triangle');
     if (cur >= finalScore) {
       clearInterval(iv);
       if (finalScore >= 80 && typeof confetti === 'function') confetti({ particleCount: 70, spread: 65, origin: { y: 0.6 } });
       playBeep(523.25, 0.12); setTimeout(() => playBeep(659.25, 0.12), 110); setTimeout(() => playBeep(783.99, 0.25), 220);
     }
   }, 45);
-
   state.records.unshift({ mode: 'Karaoke Stage', detail: state.currentSong.title, score: finalScore, date: new Date().toLocaleDateString() });
   state.records = state.records.slice(0, 20);
-  try { localStorage.setItem('lso_glass_records', JSON.stringify(state.records)); } catch (e) {}
+  try { localStorage.setItem('singokey_records', JSON.stringify(state.records)); } catch (e) {}
 }
 
 function closeScoreModal() { document.getElementById('scoreModal').classList.add('hidden'); }
 function downloadScoreCard() {
-  const score = document.getElementById('scoreRollNumber').textContent;
-  const song = document.getElementById('scoreSongName').textContent;
-  const greet = document.getElementById('scoreGreeting').textContent;
-  const c = document.createElement('canvas'); c.width = 720; c.height = 400;
-  const ctx = c.getContext('2d');
+  const score = document.getElementById('scoreRollNumber').textContent, song = document.getElementById('scoreSongName').textContent, greet = document.getElementById('scoreGreeting').textContent;
+  const c = document.createElement('canvas'); c.width = 720; c.height = 400; const ctx = c.getContext('2d');
   const g = ctx.createLinearGradient(0, 0, 720, 400); g.addColorStop(0, '#0f172a'); g.addColorStop(1, '#3b0764');
-  ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 400);
-  ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(36, 36, 648, 328);
-  ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 24px sans-serif'; ctx.fillText("SING'OKEY — Score Card", 64, 88);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, 720, 400); ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(36, 36, 648, 328);
+  ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 24px sans-serif'; ctx.fillText('SINGOKEY — Score Card', 64, 88);
   ctx.fillStyle = '#ffffff'; ctx.font = 'bold 96px sans-serif'; ctx.fillText(score + ' / 100', 64, 210);
   ctx.fillStyle = '#e879f9'; ctx.font = 'bold 26px sans-serif'; ctx.fillText(song, 64, 270);
   ctx.fillStyle = '#cbd5e1'; ctx.font = '20px sans-serif'; ctx.fillText(greet, 64, 315);
@@ -526,8 +480,7 @@ function downloadScoreCard() {
 }
 
 function renderSongs() {
-  const grid = document.getElementById('songGrid');
-  const q = state.search.toLowerCase().trim();
+  const grid = document.getElementById('songGrid'), q = state.search.toLowerCase().trim();
   let list = SONGS.filter(s => {
     if (state.filter === 'new' && !s.isNew) return false;
     if (['opm', 'party', 'classic'].includes(state.filter) && s.category !== state.filter) return false;
@@ -547,8 +500,8 @@ function renderSongs() {
         <p class="text-xs text-slate-300 truncate">${s.artist} • ${s.lang}</p>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="singNow('${s.id}')" class="glass-btn-primary flex-1 py-2 rounded-xl text-xs font-semibold text-white">Sing Now</button>
-        <button onclick="reserveSong('${s.id}')" class="glass-pill px-3 py-2 rounded-xl text-xs font-semibold text-sky-200">+ Reserve</button>
+        <button onclick="singNow('${s.id}')" class="glass-btn-primary flex-1 py-2 rounded-full text-xs font-semibold text-white">Sing Now</button>
+        <button onclick="reserveSong('${s.id}')" class="glass-pill px-3 py-2 rounded-full text-xs font-semibold text-sky-200">+ Reserve</button>
       </div>
     </div>
   `).join('') : '<div class="col-span-full text-center py-8 text-sm text-slate-300">No matching songs found.</div>';
@@ -558,10 +511,11 @@ function singNow(id) { const s = SONGS.find(x => x.id === id); if (!s) return; s
 function reserveSong(id) { const s = SONGS.find(x => x.id === id); if (!s) return; state.queue.push(s); renderQueue(); showToast(`Reserved #${s.id} ${s.title}`); }
 function renderQueue() {
   document.getElementById('queueBadge').textContent = state.queue.length;
+  updateMarquee();
   const el = document.getElementById('queueList');
   if (!state.queue.length) { el.innerHTML = '<p class="text-xs text-slate-400 py-4 text-center">Queue is empty. Reserve songs from the Songbook or Remote.</p>'; return; }
   el.innerHTML = state.queue.map((s, idx) => `
-    <div class="glass-pill rounded-xl px-3 py-2 flex items-center justify-between gap-2">
+    <div class="glass-pill rounded-2xl px-3 py-2 flex items-center justify-between gap-2">
       <div class="min-w-0"><div class="text-xs font-semibold text-white truncate">${idx + 1}. ${s.title}</div><div class="text-[11px] text-slate-300 truncate">${s.artist}</div></div>
       <button onclick="removeFromQueue(${idx})" class="text-xs text-rose-300 hover:text-rose-200 px-1.5">✕</button>
     </div>
@@ -674,7 +628,7 @@ document.querySelectorAll('.arcade-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.arcade-panel').forEach(p => p.classList.add('hidden'));
     document.getElementById('game-' + btn.dataset.game).classList.remove('hidden');
-    document.querySelectorAll('.arcade-btn').forEach(b => { b.className = b === btn ? 'arcade-btn glass-btn-primary px-3 py-2 rounded-xl text-xs font-semibold' : 'arcade-btn glass-pill px-3 py-2 rounded-xl text-xs font-medium'; });
+    document.querySelectorAll('.arcade-btn').forEach(b => { b.className = b === btn ? 'arcade-btn glass-btn-primary px-3.5 py-2 rounded-full text-xs font-semibold' : 'arcade-btn glass-pill px-3.5 py-2 rounded-full text-xs font-medium'; });
     resizeArcadeCanvases();
     if (btn.dataset.game === 'records') renderRecords();
   });
@@ -771,7 +725,7 @@ function startGuessRound() {
   while (opts.length < 4) { const cand = SONGS[Math.floor(Math.random() * SONGS.length)]; if (!opts.includes(cand)) opts.push(cand); }
   opts.sort(() => Math.random() - 0.5);
   document.getElementById('guessOptions').innerHTML = opts.map(s => `
-    <button data-id="${s.id}" onclick="answerGuess('${s.id}', this)" class="guess-opt glass-pill p-3.5 rounded-xl text-left hover:border-sky-400">
+    <button data-id="${s.id}" onclick="answerGuess('${s.id}', this)" class="guess-opt glass-pill p-3.5 rounded-2xl text-left hover:border-sky-400">
       <div class="font-bold text-sm text-white">${s.title}</div><div class="text-xs text-slate-300">${s.artist}</div>
     </button>
   `).join('');
@@ -807,13 +761,13 @@ function renderRecords() {
   const el = document.getElementById('recordsTable');
   if (!state.records.length) { el.innerHTML = '<p class="text-xs text-slate-400 py-6 text-center">No score records yet. Sing a song or finish an Arcade round!</p>'; return; }
   el.innerHTML = state.records.map((r, i) => `
-    <div class="glass-pill rounded-xl px-3.5 py-2.5 flex items-center justify-between text-xs">
+    <div class="glass-pill rounded-2xl px-3.5 py-2.5 flex items-center justify-between text-xs">
       <div><b class="text-white">${i + 1}. ${r.detail}</b> <span class="text-slate-400">(${r.mode})</span></div>
       <div class="flex items-center gap-3"><span class="text-slate-400">${r.date}</span><span class="font-mono font-bold text-sky-300 text-sm">${r.score}</span></div>
     </div>
   `).join('');
 }
-function clearRecords() { state.records = []; try { localStorage.removeItem('lso_glass_records'); } catch (e) {} renderRecords(); }
+function clearRecords() { state.records = []; try { localStorage.removeItem('singokey_records'); } catch (e) {} renderRecords(); }
 
 const MOVIE_CATALOG = [
   { id: 'm1', title: 'Big Buck Bunny', cat: 'anime', year: 2008, rating: '8.4', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', desc: 'A giant rabbit with a heart bigger than himself stands up to three mischievous forest critters.' },
@@ -826,7 +780,7 @@ try { const mf = localStorage.getItem('singokey_movie_favs'); if (mf) movieFavs 
 
 function setMovieCat(cat) {
   movieCat = cat;
-  document.querySelectorAll('.movie-cat').forEach(b => { b.className = b.dataset.cat === cat ? 'movie-cat glass-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold' : 'movie-cat glass-pill px-3 py-1.5 rounded-xl text-xs font-medium'; });
+  document.querySelectorAll('.movie-cat').forEach(b => { b.className = b.dataset.cat === cat ? 'movie-cat glass-btn-primary px-3.5 py-1.5 rounded-full text-xs font-semibold' : 'movie-cat glass-pill px-3.5 py-1.5 rounded-full text-xs font-medium'; });
   renderMovies();
 }
 function renderMovies() {
@@ -839,7 +793,7 @@ function renderMovies() {
         <h4 class="font-bold text-sm text-white truncate">${m.title}</h4>
         <p class="text-[11px] text-slate-300 line-clamp-2 mt-1">${m.desc}</p>
       </div>
-      <button onclick="playMovieItem('${m.id}')" class="glass-btn-primary py-1.5 rounded-xl text-xs font-semibold text-white">Watch Now</button>
+      <button onclick="playMovieItem('${m.id}')" class="glass-btn-primary py-1.5 rounded-full text-xs font-semibold text-white">Watch Now</button>
     </div>
   `).join('') : '<div class="col-span-full text-xs text-slate-400 text-center py-6">No matching titles.</div>';
 }
@@ -906,9 +860,9 @@ function renderTvChannels() {
   const q = (document.getElementById('tvSearchInput').value || '').toLowerCase().trim();
   const list = tvChannels.filter(c => !q || c.name.toLowerCase().includes(q) || c.group.toLowerCase().includes(q));
   document.getElementById('tvChannelList').innerHTML = list.map((c, idx) => `
-    <button onclick="tuneTvChannel(${idx}, '${c.url.replace(/'/g, '')}', '${c.name.replace(/'/g, '')}', '${c.group.replace(/'/g, '')}')" class="glass-pill rounded-xl px-3 py-2.5 text-left flex items-center justify-between gap-2">
+    <button onclick="tuneTvChannel(${idx}, '${c.url.replace(/'/g, '')}', '${c.name.replace(/'/g, '')}', '${c.group.replace(/'/g, '')}')" class="glass-pill rounded-2xl px-3 py-2.5 text-left flex items-center justify-between gap-2">
       <div class="min-w-0"><div class="text-xs font-semibold text-white truncate">${c.name}</div><div class="text-[10px] text-sky-300 truncate">${c.group}</div></div>
-      <span class="text-[10px] px-2 py-0.5 rounded bg-white/10 text-slate-200">Play</span>
+      <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-slate-200">Play</span>
     </button>
   `).join('');
 }
@@ -935,7 +889,7 @@ document.getElementById('btnMicStage').addEventListener('click', toggleMic);
 document.getElementById('btnMicSettings').addEventListener('click', toggleMic);
 document.getElementById('btnPitchToggle').addEventListener('click', () => {
   state.pitchGuideOn = !state.pitchGuideOn;
-  document.getElementById('pitchToggleLabel').textContent = 'Pitch Guide: ' + (state.pitchGuideOn ? 'ON' : 'OFF');
+  document.getElementById('pitchToggleLabel').textContent = 'Key Finder: ' + (state.pitchGuideOn ? 'ON' : 'OFF');
   document.getElementById('pitchBarPanel').classList.toggle('hidden', !state.pitchGuideOn);
 });
 document.getElementById('seekSlider').addEventListener('input', e => {
@@ -962,7 +916,7 @@ document.getElementById('songSearchInput').addEventListener('input', e => { stat
 document.querySelectorAll('.filter-chip').forEach(ch => {
   ch.addEventListener('click', () => {
     state.filter = ch.dataset.filter;
-    document.querySelectorAll('.filter-chip').forEach(c => { c.className = c === ch ? 'filter-chip glass-btn-primary px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap' : 'filter-chip glass-pill px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap'; });
+    document.querySelectorAll('.filter-chip').forEach(c => { c.className = c === ch ? 'filter-chip glass-btn-primary px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap' : 'filter-chip glass-pill px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap'; });
     renderSongs();
   });
 });
