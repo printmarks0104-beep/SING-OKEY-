@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SING'OKEY — Karaoke &amp; Oke Arcade</title>
+  <title>SINGOKEY — Immersive Glass Karaoke &amp; Oke Arcade</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
@@ -14,132 +14,95 @@
   <style>
     :root {
       --lyric-color: #38bdf8;
-      --lyric-size: 1.75rem;
-      --glass-bg: rgba(255, 255, 255, 0.08);
-      --glass-bg-strong: rgba(20, 26, 56, 0.56);
-      --glass-border: rgba(255, 255, 255, 0.18);
+      --lyric-size: 1.85rem;
+      --glass-bg: rgba(18, 25, 54, 0.48);
+      --glass-bg-strong: rgba(12, 18, 42, 0.68);
+      --glass-border: rgba(255, 255, 255, 0.16);
       --glass-highlight: rgba(255, 255, 255, 0.28);
+      --neon-cyan: #38bdf8;
+      --neon-magenta: #e879f9;
     }
     * { box-sizing: border-box; }
     html, body {
-      margin: 0;
-      padding: 0;
-      min-height: 100%;
+      margin: 0; padding: 0; min-height: 100%;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: #f8fafc;
-      background: #070b1a;
-      overflow-x: hidden;
+      color: #f8fafc; background: #050816; overflow-x: hidden;
     }
     .aurora-bg {
-      position: fixed;
-      inset: 0;
-      z-index: -1;
+      position: fixed; inset: 0; z-index: -1;
       background:
-        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.28), transparent 45%),
-        radial-gradient(circle at 82% 18%, rgba(217, 70, 239, 0.26), transparent 48%),
-        radial-gradient(circle at 75% 82%, rgba(99, 102, 241, 0.30), transparent 50%),
-        radial-gradient(circle at 20% 85%, rgba(20, 184, 166, 0.22), transparent 45%),
-        linear-gradient(135deg, #060919 0%, #111636 48%, #1d1038 100%);
+        radial-gradient(circle at 14% 18%, rgba(56, 189, 248, 0.28), transparent 45%),
+        radial-gradient(circle at 84% 16%, rgba(232, 121, 249, 0.24), transparent 48%),
+        radial-gradient(circle at 75% 84%, rgba(99, 102, 241, 0.30), transparent 50%),
+        radial-gradient(circle at 18% 86%, rgba(20, 184, 166, 0.20), transparent 45%),
+        linear-gradient(135deg, #040714 0%, #0d1330 48%, #190d33 100%);
       overflow: hidden;
     }
     .orb {
-      position: absolute;
-      border-radius: 9999px;
-      filter: blur(72px);
-      opacity: 0.55;
-      animation: floatOrb 18s ease-in-out infinite alternate;
-      pointer-events: none;
+      position: absolute; border-radius: 9999px; filter: blur(76px); opacity: 0.52;
+      animation: floatOrb 18s ease-in-out infinite alternate; pointer-events: none;
     }
     .orb-1 { width: 380px; height: 380px; top: -80px; left: -60px; background: #06b6d4; }
     .orb-2 { width: 420px; height: 420px; top: 30%; right: -110px; background: #c026d3; animation-delay: -6s; }
     .orb-3 { width: 340px; height: 340px; bottom: -80px; left: 25%; background: #6366f1; animation-delay: -11s; }
-    @keyframes floatOrb {
-      0% { transform: translate(0, 0) scale(1); }
-      100% { transform: translate(35px, -30px) scale(1.12); }
-    }
+    @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(35px, -30px) scale(1.12); } }
+
     .glass {
       background: var(--glass-bg);
-      backdrop-filter: blur(22px) saturate(165%);
-      -webkit-backdrop-filter: blur(22px) saturate(165%);
+      backdrop-filter: blur(24px) saturate(170%);
+      -webkit-backdrop-filter: blur(24px) saturate(170%);
       border: 1px solid var(--glass-border);
-      box-shadow: 0 12px 40px rgba(2, 6, 23, 0.45), inset 0 1px 0 var(--glass-highlight);
+      box-shadow: 0 14px 42px rgba(2, 6, 23, 0.48), inset 0 1px 0 var(--glass-highlight);
     }
     .glass-strong {
       background: var(--glass-bg-strong);
-      backdrop-filter: blur(28px) saturate(175%);
-      -webkit-backdrop-filter: blur(28px) saturate(175%);
+      backdrop-filter: blur(28px) saturate(180%);
+      -webkit-backdrop-filter: blur(28px) saturate(180%);
       border: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 16px 48px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.30);
+      box-shadow: 0 18px 50px rgba(2, 6, 23, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.30);
+    }
+    .curved-dock {
+      border-radius: 2rem;
+      background: rgba(15, 23, 52, 0.62);
+      backdrop-filter: blur(26px) saturate(180%);
+      -webkit-backdrop-filter: blur(26px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 16px 40px rgba(2, 6, 23, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.32);
     }
     .glass-pill {
-      background: rgba(255, 255, 255, 0.09);
+      background: rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       border: 1px solid rgba(255, 255, 255, 0.16);
       transition: all 0.2s ease;
     }
-    .glass-pill:hover {
-      background: rgba(255, 255, 255, 0.17);
-      border-color: rgba(255, 255, 255, 0.32);
-      transform: translateY(-1px);
-    }
+    .glass-pill:hover { background: rgba(255, 255, 255, 0.16); border-color: rgba(255, 255, 255, 0.32); transform: translateY(-1px); }
     .glass-btn-primary {
-      background: linear-gradient(135deg, rgba(56, 189, 248, 0.85), rgba(168, 85, 247, 0.85));
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.88), rgba(168, 85, 247, 0.88));
+      border: 1px solid rgba(255, 255, 255, 0.38);
+      box-shadow: 0 8px 24px rgba(56, 189, 248, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.45);
       transition: all 0.2s ease;
     }
-    .glass-btn-primary:hover {
-      filter: brightness(1.1);
-      transform: translateY(-1px);
-      box-shadow: 0 12px 30px rgba(168, 85, 247, 0.40);
-    }
+    .glass-btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 12px 30px rgba(168, 85, 247, 0.42); }
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.38); }
     .lyric-line {
       font-family: 'Space Grotesk', 'Inter', sans-serif;
-      font-size: var(--lyric-size);
-      line-height: 1.35;
-      letter-spacing: -0.01em;
-      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.55);
+      font-size: var(--lyric-size); line-height: 1.35; letter-spacing: -0.01em;
+      text-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
     }
-    .syllable-sung {
-      color: var(--lyric-color);
-      text-shadow: 0 0 18px var(--lyric-color), 0 2px 10px rgba(0,0,0,0.6);
-    }
+    .syllable-sung { color: var(--lyric-color); text-shadow: 0 0 18px var(--lyric-color), 0 2px 10px rgba(0,0,0,0.65); }
     @keyframes floatUp {
       0% { opacity: 0; transform: translateY(20px) scale(0.7); }
       15% { opacity: 1; transform: translateY(0px) scale(1.15); }
       100% { opacity: 0; transform: translateY(-170px) scale(1.35) rotate(8deg); }
     }
-    .reaction-float {
-      position: absolute;
-      bottom: 24px;
-      pointer-events: none;
-      font-size: 2rem;
-      animation: floatUp 2.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-      z-index: 30;
-    }
-    input[type="range"].glass-range {
-      -webkit-appearance: none;
-      appearance: none;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.16);
-      outline: none;
-    }
+    .reaction-float { position: absolute; bottom: 24px; pointer-events: none; font-size: 2rem; animation: floatUp 2.1s cubic-bezier(0.22, 1, 0.36, 1) forwards; z-index: 30; }
+    input[type="range"].glass-range { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.16); outline: none; }
     input[type="range"].glass-range::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #38bdf8;
-      border: 2px solid #fff;
-      box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
-      cursor: pointer;
+      -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: #38bdf8; border: 2px solid #fff; box-shadow: 0 0 10px rgba(56, 189, 248, 0.85); cursor: pointer;
     }
   </style>
 </head>
@@ -152,45 +115,58 @@
   <div id="toastBox" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-xs"></div>
 
   <div class="min-h-screen flex flex-col max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-5 gap-4">
-    <header class="glass rounded-2xl px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <!-- Curved Glass Main Navigation & Brand Header -->
+    <header class="curved-dock px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl glass-btn-primary flex items-center justify-center shadow-lg">
+        <div class="w-10 h-10 rounded-2xl glass-btn-primary flex items-center justify-center shadow-lg">
           <i data-lucide="mic-2" class="w-5 h-5 text-white"></i>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-bold text-lg tracking-tight text-white" style="font-family:'Space Grotesk',sans-serif;">SING'<span class="text-sky-300 font-semibold">OKEY</span></h1>
-            <span class="text-[11px] px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-sky-200 font-medium">v4.4.2</span>
+            <h1 class="font-bold text-lg tracking-tight text-white" style="font-family:'Space Grotesk',sans-serif;">SING<span class="text-sky-300 font-semibold">OKEY</span></h1>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-sky-400/20 border border-sky-300/30 text-sky-200 font-semibold uppercase tracking-wider">Glass</span>
           </div>
-          <p class="text-xs text-slate-300/80 hidden sm:block">MIDI Karaoke • Pitch Guide • Oke Arcade • Web Remote</p>
+          <p class="text-[11px] text-slate-300/80 hidden sm:block">Immersive Stage • Key Finder • Studio EQ • Oke Arcade</p>
         </div>
       </div>
 
       <nav class="flex items-center gap-1.5 overflow-x-auto max-w-full py-0.5" id="mainNav">
-        <button data-tab="stage" class="nav-tab glass-btn-primary text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+        <button data-tab="stage" class="nav-tab glass-btn-primary text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="sparkles" class="w-4 h-4"></i><span>Stage</span>
         </button>
-        <button data-tab="songbook" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+        <button data-tab="songbook" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="library" class="w-4 h-4"></i><span>Songbook</span>
           <span id="queueBadge" class="ml-0.5 px-1.5 py-0.2 rounded-full text-[10px] bg-sky-400/30 text-sky-100 border border-sky-300/30">0</span>
         </button>
-        <button data-tab="arcade" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+        <button data-tab="arcade" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="gamepad-2" class="w-4 h-4"></i><span>Oke Arcade</span>
         </button>
-        <button data-tab="movie" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+        <button data-tab="movie" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="clapperboard" class="w-4 h-4"></i><span>Movie Oke</span>
         </button>
-        <button data-tab="tv" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+        <button data-tab="tv" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="tv" class="w-4 h-4"></i><span>TV Oke</span>
         </button>
-        <button data-tab="remote" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
+        <button data-tab="remote" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="smartphone" class="w-4 h-4"></i><span>Remote</span>
         </button>
-        <button data-tab="settings" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-xl flex items-center gap-1.5 whitespace-nowrap">
-          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i><span>Mic &amp; FX</span>
+        <button data-tab="settings" class="nav-tab glass-pill text-slate-200 text-xs sm:text-sm font-medium px-3.5 py-2 rounded-full flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="sliders-horizontal" class="w-4 h-4"></i><span>Studio &amp; Mic</span>
         </button>
       </nav>
     </header>
+
+    <!-- Edge Top Marquee Bar -->
+    <div class="glass rounded-2xl px-4 py-2 flex items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2 min-w-0">
+        <span class="px-2 py-0.5 rounded-full bg-fuchsia-500/25 border border-fuchsia-300/35 text-fuchsia-200 font-bold text-[10px] uppercase">Now Playing</span>
+        <span id="marqueeNow" class="text-white font-semibold truncate">001 • Na Para Bang — Mariah Deborah</span>
+      </div>
+      <div class="hidden sm:flex items-center gap-2 text-slate-300 truncate">
+        <span class="text-sky-300 font-semibold">Up Next:</span>
+        <span id="marqueeNext">Reserve a track in Songbook or Remote</span>
+      </div>
+    </div>
 
     <main id="tab-stage" class="tab-panel grid grid-cols-1 lg:grid-cols-12 gap-4">
       <section class="lg:col-span-8 flex flex-col gap-4">
@@ -204,11 +180,11 @@
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <button id="btnPitchToggle" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-sky-200">
+              <button id="btnPitchToggle" class="glass-pill px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 text-sky-200">
                 <i data-lucide="music" class="w-3.5 h-3.5"></i>
-                <span id="pitchToggleLabel">Pitch Guide: ON</span>
+                <span id="pitchToggleLabel">Key Finder: ON</span>
               </button>
-              <button id="btnMicStage" class="glass-pill px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-200">
+              <button id="btnMicStage" class="glass-pill px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-1.5 text-slate-200">
                 <i data-lucide="mic" class="w-3.5 h-3.5"></i>
                 <span id="micStageLabel">Mic Off</span>
               </button>
@@ -217,9 +193,9 @@
 
           <div id="pitchBarPanel" class="glass rounded-2xl p-3 my-3 z-10">
             <div class="flex items-center justify-between text-[11px] text-slate-300 mb-1.5">
-              <span>Target Note: <b id="targetNoteName" class="text-sky-300">--</b></span>
+              <span>Target Key: <b id="targetNoteName" class="text-sky-300">--</b></span>
               <span>Your Pitch: <b id="micNoteName" class="text-fuchsia-300">--</b></span>
-              <span>Live Accuracy: <b id="liveAccPct" class="text-emerald-300">0%</b></span>
+              <span>Match Accuracy: <b id="liveAccPct" class="text-emerald-300">0%</b></span>
             </div>
             <canvas id="pitchCanvas" class="w-full h-16 rounded-xl bg-slate-950/40"></canvas>
           </div>
@@ -246,28 +222,28 @@
             </div>
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div class="flex items-center gap-2">
-                <button id="btnPlayPause" class="glass-btn-primary px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1.5 text-white">
+                <button id="btnPlayPause" class="glass-btn-primary px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-1.5 text-white">
                   <i data-lucide="play" class="w-4 h-4"></i><span id="playPauseText">Play</span>
                 </button>
-                <button id="btnStop" class="glass-pill p-2.5 rounded-xl text-slate-200" title="Stop">
+                <button id="btnStop" class="glass-pill p-2.5 rounded-full text-slate-200" title="Stop">
                   <i data-lucide="square" class="w-4 h-4"></i>
                 </button>
-                <button id="btnReplay" class="glass-pill p-2.5 rounded-xl text-slate-200" title="Replay">
+                <button id="btnReplay" class="glass-pill p-2.5 rounded-full text-slate-200" title="Replay">
                   <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
                 </button>
-                <button id="btnSkip" class="glass-pill px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 text-slate-200" title="Skip to Next in Queue">
+                <button id="btnSkip" class="glass-pill px-3 py-2 rounded-full text-xs font-semibold flex items-center gap-1 text-slate-200" title="Skip to Next in Queue">
                   <i data-lucide="skip-forward" class="w-4 h-4"></i><span>Skip</span>
                 </button>
-                <button id="btnFinishScore" class="glass-pill px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 text-amber-200" title="Finish Song & Score">
+                <button id="btnFinishScore" class="glass-pill px-3 py-2 rounded-full text-xs font-semibold flex items-center gap-1 text-amber-200" title="Finish Song & Score">
                   <i data-lucide="award" class="w-4 h-4"></i><span>Score</span>
                 </button>
               </div>
               <div class="flex items-center gap-1.5">
-                <button onclick="spawnReaction('👏')" class="glass-pill px-2.5 py-1.5 rounded-xl text-base" title="Clap">👏</button>
-                <button onclick="spawnReaction('🔥')" class="glass-pill px-2.5 py-1.5 rounded-xl text-base" title="Fire">🔥</button>
-                <button onclick="spawnReaction('🎉')" class="glass-pill px-2.5 py-1.5 rounded-xl text-base" title="Party">🎉</button>
-                <button onclick="spawnReaction('❤️')" class="glass-pill px-2.5 py-1.5 rounded-xl text-base" title="Love">❤️</button>
-                <button onclick="spawnReaction('😂')" class="glass-pill px-2.5 py-1.5 rounded-xl text-base" title="Laugh">😂</button>
+                <button onclick="spawnReaction('👏')" class="glass-pill px-2.5 py-1.5 rounded-full text-base" title="Clap">👏</button>
+                <button onclick="spawnReaction('🔥')" class="glass-pill px-2.5 py-1.5 rounded-full text-base" title="Fire">🔥</button>
+                <button onclick="spawnReaction('🎉')" class="glass-pill px-2.5 py-1.5 rounded-full text-base" title="Party">🎉</button>
+                <button onclick="spawnReaction('❤️')" class="glass-pill px-2.5 py-1.5 rounded-full text-base" title="Love">❤️</button>
+                <button onclick="spawnReaction('😂')" class="glass-pill px-2.5 py-1.5 rounded-full text-base" title="Laugh">😂</button>
               </div>
             </div>
           </div>
@@ -278,34 +254,34 @@
         <div class="glass rounded-3xl p-4 sm:p-5 flex flex-col gap-3.5">
           <div class="flex items-center justify-between">
             <h3 class="font-bold text-sm text-white flex items-center gap-2">
-              <i data-lucide="audio-waveform" class="w-4 h-4 text-sky-300"></i> Stage Controls
+              <i data-lucide="audio-waveform" class="w-4 h-4 text-sky-300"></i> Paired Stage Controls
             </h3>
-            <button id="btnMelodyToggle" class="glass-pill px-2.5 py-1 rounded-lg text-xs font-semibold text-sky-200">
+            <button id="btnMelodyToggle" class="glass-pill px-2.5 py-1 rounded-full text-xs font-semibold text-sky-200">
               Melody: ON
             </button>
           </div>
-          <div class="flex items-center justify-between glass-pill rounded-xl px-3 py-2">
+          <div class="flex items-center justify-between glass-pill rounded-2xl px-3 py-2">
             <span class="text-xs text-slate-300">Key Shift</span>
             <div class="flex items-center gap-2">
-              <button onclick="adjustKey(-1)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 font-bold text-sm">−</button>
+              <button onclick="adjustKey(-1)" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 font-bold text-sm">−</button>
               <span id="keyVal" class="w-10 text-center font-mono text-xs font-bold text-sky-300">0</span>
-              <button onclick="adjustKey(1)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 font-bold text-sm">+</button>
+              <button onclick="adjustKey(1)" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 font-bold text-sm">+</button>
             </div>
           </div>
-          <div class="flex items-center justify-between glass-pill rounded-xl px-3 py-2">
+          <div class="flex items-center justify-between glass-pill rounded-2xl px-3 py-2">
             <span class="text-xs text-slate-300">Tempo</span>
             <div class="flex items-center gap-2">
-              <button onclick="adjustTempo(-0.05)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 font-bold text-sm">−</button>
+              <button onclick="adjustTempo(-0.05)" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 font-bold text-sm">−</button>
               <span id="tempoVal" class="w-12 text-center font-mono text-xs font-bold text-fuchsia-300">1.00x</span>
-              <button onclick="adjustTempo(0.05)" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 font-bold text-sm">+</button>
+              <button onclick="adjustTempo(0.05)" class="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 font-bold text-sm">+</button>
             </div>
           </div>
-          <div class="flex items-center justify-between glass-pill rounded-xl px-3 py-2">
+          <div class="flex items-center justify-between glass-pill rounded-2xl px-3 py-2">
             <span class="text-xs text-slate-300">Lyric Sync</span>
             <div class="flex items-center gap-1.5">
-              <button onclick="adjustOffset(-0.1)" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px]">−0.1s</button>
+              <button onclick="adjustOffset(-0.1)" class="px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[11px]">−0.1s</button>
               <span id="offsetVal" class="w-11 text-center font-mono text-xs font-bold text-emerald-300">0.0s</span>
-              <button onclick="adjustOffset(0.1)" class="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-[11px]">+0.1s</button>
+              <button onclick="adjustOffset(0.1)" class="px-2 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[11px]">+0.1s</button>
             </div>
           </div>
           <div class="flex flex-col gap-1">
@@ -332,14 +308,14 @@
       <div class="glass rounded-3xl p-4 sm:p-6 flex flex-col gap-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 class="font-bold text-xl text-white">Karaoke Songbook</h2>
+            <h2 class="font-bold text-xl text-white">SINGOKEY Songbook</h2>
             <p class="text-xs text-slate-300">Search by title, artist, or song code — reserve or sing instantly</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button onclick="openAddSongModal()" class="glass-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-white">
+            <button onclick="openAddSongModal()" class="glass-btn-primary px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 text-white">
               <i data-lucide="plus-circle" class="w-4 h-4"></i><span>Add MIDI / MP3+LRC</span>
             </button>
-            <button onclick="exportSongbook()" class="glass-pill px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 text-slate-200">
+            <button onclick="exportSongbook()" class="glass-pill px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-1.5 text-slate-200">
               <i data-lucide="download" class="w-4 h-4"></i><span>Export Songbook</span>
             </button>
           </div>
@@ -347,15 +323,15 @@
         <div class="flex flex-col sm:flex-row gap-3">
           <div class="relative flex-1">
             <i data-lucide="search" class="w-4 h-4 text-slate-300 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-            <input id="songSearchInput" type="text" placeholder="Search title, artist, or code (e.g. 001, Mariah, Gimme)..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 border border-white/20 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400" />
+            <input id="songSearchInput" type="text" placeholder="Search title, artist, or code (e.g. 001, Mariah, Gimme)..." class="w-full pl-10 pr-4 py-2.5 rounded-full bg-white/10 border border-white/20 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-sky-400" />
           </div>
           <div class="flex items-center gap-1.5 overflow-x-auto pb-1" id="songFilterChips">
-            <button data-filter="all" class="filter-chip glass-btn-primary px-3 py-2 rounded-xl text-xs font-semibold whitespace-nowrap">All</button>
-            <button data-filter="new" class="filter-chip glass-pill px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap">New Songs</button>
-            <button data-filter="opm" class="filter-chip glass-pill px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap">OPM / Tagalog</button>
-            <button data-filter="party" class="filter-chip glass-pill px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap">Party / Pop</button>
-            <button data-filter="classic" class="filter-chip glass-pill px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap">Classics</button>
-            <button data-filter="rankings" class="filter-chip glass-pill px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap">Top Rankings</button>
+            <button data-filter="all" class="filter-chip glass-btn-primary px-3.5 py-2 rounded-full text-xs font-semibold whitespace-nowrap">All</button>
+            <button data-filter="new" class="filter-chip glass-pill px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap">New Songs</button>
+            <button data-filter="opm" class="filter-chip glass-pill px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap">OPM / Tagalog</button>
+            <button data-filter="party" class="filter-chip glass-pill px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap">Party / Pop</button>
+            <button data-filter="classic" class="filter-chip glass-pill px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap">Classics</button>
+            <button data-filter="rankings" class="filter-chip glass-pill px-3.5 py-2 rounded-full text-xs font-medium whitespace-nowrap">Top Rankings</button>
           </div>
         </div>
         <div id="songGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
@@ -370,11 +346,11 @@
             <p class="text-xs text-slate-300">Beat Drop Oke • Pulse Oke • Pitch Perfect • Guess a Song • Score Records</p>
           </div>
           <div class="flex flex-wrap items-center gap-1.5" id="arcadeTabs">
-            <button data-game="beat" class="arcade-btn glass-btn-primary px-3 py-2 rounded-xl text-xs font-semibold">Beat Drop Oke</button>
-            <button data-game="pulse" class="arcade-btn glass-pill px-3 py-2 rounded-xl text-xs font-medium">Pulse Oke</button>
-            <button data-game="pitch" class="arcade-btn glass-pill px-3 py-2 rounded-xl text-xs font-medium">Pitch Perfect</button>
-            <button data-game="guess" class="arcade-btn glass-pill px-3 py-2 rounded-xl text-xs font-medium">Guess a Song</button>
-            <button data-game="records" class="arcade-btn glass-pill px-3 py-2 rounded-xl text-xs font-medium">Score Records</button>
+            <button data-game="beat" class="arcade-btn glass-btn-primary px-3.5 py-2 rounded-full text-xs font-semibold">Beat Drop Oke</button>
+            <button data-game="pulse" class="arcade-btn glass-pill px-3.5 py-2 rounded-full text-xs font-medium">Pulse Oke</button>
+            <button data-game="pitch" class="arcade-btn glass-pill px-3.5 py-2 rounded-full text-xs font-medium">Pitch Perfect</button>
+            <button data-game="guess" class="arcade-btn glass-pill px-3.5 py-2 rounded-full text-xs font-medium">Guess a Song</button>
+            <button data-game="records" class="arcade-btn glass-pill px-3.5 py-2 rounded-full text-xs font-medium">Score Records</button>
           </div>
         </div>
 
@@ -382,12 +358,12 @@
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-base text-white">Beat Drop Oke</h3>
-              <p class="text-xs text-slate-300">Tap the 4 neon lanes or press keys <kbd class="px-1.5 py-0.5 rounded bg-white/15">D</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/15">F</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/15">J</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/15">K</kbd> as notes hit the glow line</p>
+              <p class="text-xs text-slate-300">Tap the 4 neon lanes or press keys <kbd class="px-1.5 py-0.5 rounded bg-white/15">D</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/15">F</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/15">J</kbd> <kbd class="px-1.5 py-0.5 rounded bg-white/15">K</kbd></p>
             </div>
             <div class="flex items-center gap-3 text-xs font-mono">
               <span>Score: <b id="beatScore" class="text-sky-300">0</b></span>
               <span>Combo: <b id="beatCombo" class="text-fuchsia-300">0x</b></span>
-              <button id="btnBeatStart" class="glass-btn-primary px-3.5 py-1.5 rounded-xl font-sans font-semibold text-white">Start</button>
+              <button id="btnBeatStart" class="glass-btn-primary px-3.5 py-1.5 rounded-full font-sans font-semibold text-white">Start</button>
             </div>
           </div>
           <canvas id="beatCanvas" class="w-full h-72 rounded-xl bg-slate-950/60 border border-white/10"></canvas>
@@ -408,7 +384,7 @@
             <div class="flex items-center gap-3 text-xs font-mono">
               <span>Score: <b id="pulseScore" class="text-sky-300">0</b></span>
               <span>Streak: <b id="pulseStreak" class="text-emerald-300">0</b></span>
-              <button id="btnPulseStart" class="glass-btn-primary px-3.5 py-1.5 rounded-xl font-sans font-semibold text-white">Start</button>
+              <button id="btnPulseStart" class="glass-btn-primary px-3.5 py-1.5 rounded-full font-sans font-semibold text-white">Start</button>
             </div>
           </div>
           <canvas id="pulseCanvas" class="w-full h-72 rounded-xl bg-slate-950/60 border border-white/10 cursor-pointer"></canvas>
@@ -422,8 +398,8 @@
             </div>
             <div class="flex items-center gap-3 text-xs font-mono">
               <span>Score: <b id="pitchGameScore" class="text-sky-300">0</b></span>
-              <button id="btnPitchPlayRef" class="glass-pill px-3 py-1.5 rounded-xl font-sans font-semibold text-sky-200">Play Target Tone</button>
-              <button id="btnPitchNext" class="glass-btn-primary px-3.5 py-1.5 rounded-xl font-sans font-semibold text-white">Next Note</button>
+              <button id="btnPitchPlayRef" class="glass-pill px-3 py-1.5 rounded-full font-sans font-semibold text-sky-200">Play Target Tone</button>
+              <button id="btnPitchNext" class="glass-btn-primary px-3.5 py-1.5 rounded-full font-sans font-semibold text-white">Next Note</button>
             </div>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
@@ -438,7 +414,7 @@
                 <span id="pitchMatchBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-200 font-semibold">Waiting...</span>
               </div>
               <input id="pitchManualSlider" type="range" min="130" max="523" value="261" step="0.5" class="glass-range w-full" />
-              <button id="btnPitchCheck" class="glass-btn-primary py-2.5 rounded-xl text-xs font-semibold text-white">Lock &amp; Score Match</button>
+              <button id="btnPitchCheck" class="glass-btn-primary py-2.5 rounded-full text-xs font-semibold text-white">Lock &amp; Score Match</button>
             </div>
           </div>
         </div>
@@ -447,20 +423,20 @@
           <div class="flex flex-wrap items-center justify-between gap-2">
             <div>
               <h3 class="font-bold text-base text-white">Guess a Song</h3>
-              <p class="text-xs text-slate-300">Listen to the synthesized melody snippet and name the track — 2 lifelines available</p>
+              <p class="text-xs text-slate-300">Listen to the synthesized melody snippet and name the track</p>
             </div>
             <div class="flex items-center gap-3 text-xs font-mono">
               <span>Score: <b id="guessScore" class="text-sky-300">0</b></span>
               <span>Lives: <b id="guessLives" class="text-rose-300">3</b></span>
-              <button onclick="startGuessRound()" class="glass-btn-primary px-3.5 py-1.5 rounded-xl font-sans font-semibold text-white">New Round</button>
+              <button onclick="startGuessRound()" class="glass-btn-primary px-3.5 py-1.5 rounded-full font-sans font-semibold text-white">New Round</button>
             </div>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button onclick="playGuessSnippet()" class="glass-pill px-4 py-2 rounded-xl text-xs font-semibold text-sky-200 flex items-center gap-1.5">
+            <button onclick="playGuessSnippet()" class="glass-pill px-4 py-2 rounded-full text-xs font-semibold text-sky-200 flex items-center gap-1.5">
               <i data-lucide="volume-2" class="w-4 h-4"></i><span>Play Melody Clue</span>
             </button>
-            <button id="btnLifeline50" onclick="useLifeline50()" class="glass-pill px-3 py-2 rounded-xl text-xs font-semibold text-amber-200">50/50 Lifeline</button>
-            <button id="btnLifelineHint" onclick="useLifelineHint()" class="glass-pill px-3 py-2 rounded-xl text-xs font-semibold text-fuchsia-200">Lyric Hint</button>
+            <button id="btnLifeline50" onclick="useLifeline50()" class="glass-pill px-3 py-2 rounded-full text-xs font-semibold text-amber-200">50/50 Lifeline</button>
+            <button id="btnLifelineHint" onclick="useLifelineHint()" class="glass-pill px-3 py-2 rounded-full text-xs font-semibold text-fuchsia-200">Lyric Hint</button>
           </div>
           <div id="guessHintBox" class="hidden glass rounded-xl px-4 py-2.5 text-xs text-fuchsia-200 italic"></div>
           <div id="guessOptions" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5"></div>
@@ -484,19 +460,18 @@
             <p class="text-xs text-slate-300">Browse movies, series &amp; anime or play any MP4 / HLS stream URL</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <button onclick="setMovieCat('all')" class="movie-cat glass-btn-primary px-3 py-1.5 rounded-xl text-xs font-semibold" data-cat="all">All</button>
-            <button onclick="setMovieCat('movie')" class="movie-cat glass-pill px-3 py-1.5 rounded-xl text-xs font-medium" data-cat="movie">Movies</button>
-            <button onclick="setMovieCat('series')" class="movie-cat glass-pill px-3 py-1.5 rounded-xl text-xs font-medium" data-cat="series">Series</button>
-            <button onclick="setMovieCat('anime')" class="movie-cat glass-pill px-3 py-1.5 rounded-xl text-xs font-medium" data-cat="anime">Anime</button>
-            <button onclick="setMovieCat('fav')" class="movie-cat glass-pill px-3 py-1.5 rounded-xl text-xs font-medium" data-cat="fav">Watchlist</button>
+            <button onclick="setMovieCat('all')" class="movie-cat glass-btn-primary px-3.5 py-1.5 rounded-full text-xs font-semibold" data-cat="all">All</button>
+            <button onclick="setMovieCat('movie')" class="movie-cat glass-pill px-3.5 py-1.5 rounded-full text-xs font-medium" data-cat="movie">Movies</button>
+            <button onclick="setMovieCat('series')" class="movie-cat glass-pill px-3.5 py-1.5 rounded-full text-xs font-medium" data-cat="series">Series</button>
+            <button onclick="setMovieCat('anime')" class="movie-cat glass-pill px-3.5 py-1.5 rounded-full text-xs font-medium" data-cat="anime">Anime</button>
+            <button onclick="setMovieCat('fav')" class="movie-cat glass-pill px-3.5 py-1.5 rounded-full text-xs font-medium" data-cat="fav">Watchlist</button>
           </div>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div class="lg:col-span-7 flex flex-col gap-3">
             <div class="flex gap-2">
-              <input id="movieSearchInput" type="text" placeholder="Search titles, genres, or paste an MP4/M3U8 URL..." class="flex-1 px-3.5 py-2 rounded-xl bg-white/10 border border-white/20 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-violet-400" />
-              <button onclick="playCustomMovieUrl()" class="glass-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold text-white whitespace-nowrap">Play URL</button>
+              <input id="movieSearchInput" type="text" placeholder="Search titles, genres, or paste an MP4/M3U8 URL..." class="flex-1 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-violet-400" />
+              <button onclick="playCustomMovieUrl()" class="glass-btn-primary px-4 py-2 rounded-full text-xs font-semibold text-white whitespace-nowrap">Play URL</button>
             </div>
             <div id="movieGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[420px] overflow-y-auto pr-1"></div>
           </div>
@@ -506,7 +481,7 @@
                 <h3 id="moviePlayerTitle" class="font-bold text-sm text-white truncate">Select a title to watch</h3>
                 <p id="moviePlayerMeta" class="text-[11px] text-slate-300 truncate">Ready • Supports MP4, WebM &amp; HLS (.m3u8)</p>
               </div>
-              <button id="btnMovieFav" onclick="toggleCurrentMovieFav()" class="glass-pill p-2 rounded-xl text-rose-300" title="Toggle Watchlist">
+              <button id="btnMovieFav" onclick="toggleCurrentMovieFav()" class="glass-pill p-2 rounded-full text-rose-300" title="Toggle Watchlist">
                 <i data-lucide="heart" class="w-4 h-4"></i>
               </button>
             </div>
@@ -522,25 +497,24 @@
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 class="font-bold text-xl text-white">TV <span class="text-sky-300">Oke</span> <span class="text-xs font-normal text-slate-300">(IPTV Live)</span></h2>
-            <p class="text-xs text-slate-300">Stream live public IPTV channels by country or load your own .m3u / .m3u8 playlist</p>
+            <p class="text-xs text-slate-300">Stream live public IPTV channels by country or load your own .m3u8 stream</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <select id="tvCountrySelect" class="bg-slate-900/80 border border-white/20 rounded-xl px-3 py-2 text-xs text-white focus:outline-none">
+            <select id="tvCountrySelect" class="bg-slate-900/80 border border-white/20 rounded-full px-3.5 py-2 text-xs text-white focus:outline-none">
               <option value="ph">Philippines (PH)</option>
               <option value="us">United States (US)</option>
               <option value="jp">Japan (JP)</option>
               <option value="kr">South Korea (KR)</option>
               <option value="gb">United Kingdom (GB)</option>
             </select>
-            <button onclick="loadIptvCountry()" class="glass-btn-primary px-3.5 py-2 rounded-xl text-xs font-semibold text-white">Load Channels</button>
+            <button onclick="loadIptvCountry()" class="glass-btn-primary px-4 py-2 rounded-full text-xs font-semibold text-white">Load Channels</button>
           </div>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
           <div class="lg:col-span-5 flex flex-col gap-3">
             <div class="flex gap-2">
-              <input id="tvSearchInput" type="text" placeholder="Filter channels or paste .m3u8 URL..." class="flex-1 px-3.5 py-2 rounded-xl bg-white/10 border border-white/20 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-400" />
-              <button onclick="playCustomTvUrl()" class="glass-pill px-3 py-2 rounded-xl text-xs font-semibold text-sky-200 whitespace-nowrap">Tune URL</button>
+              <input id="tvSearchInput" type="text" placeholder="Filter channels or paste .m3u8 URL..." class="flex-1 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-sky-400" />
+              <button onclick="playCustomTvUrl()" class="glass-pill px-4 py-2 rounded-full text-xs font-semibold text-sky-200 whitespace-nowrap">Tune URL</button>
             </div>
             <div id="tvChannelStatus" class="text-[11px] text-slate-300">Select a country and click Load Channels, or pick a preset below.</div>
             <div id="tvChannelList" class="flex flex-col gap-2 max-h-[380px] overflow-y-auto pr-1"></div>
@@ -571,29 +545,29 @@
             <span id="remoteCodeMatch" class="text-xs text-slate-300 truncate max-w-[160px]">Enter song #</span>
           </div>
           <div class="grid grid-cols-3 gap-2.5">
-            <button onclick="remoteDigit('1')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">1</button>
-            <button onclick="remoteDigit('2')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">2</button>
-            <button onclick="remoteDigit('3')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">3</button>
-            <button onclick="remoteDigit('4')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">4</button>
-            <button onclick="remoteDigit('5')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">5</button>
-            <button onclick="remoteDigit('6')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">6</button>
-            <button onclick="remoteDigit('7')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">7</button>
-            <button onclick="remoteDigit('8')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">8</button>
-            <button onclick="remoteDigit('9')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">9</button>
-            <button onclick="remoteClear()" class="glass-pill py-3.5 rounded-xl font-semibold text-sm text-rose-300">CLR</button>
-            <button onclick="remoteDigit('0')" class="glass-pill py-3.5 rounded-xl font-bold text-lg">0</button>
-            <button onclick="remoteReserve()" class="glass-btn-primary py-3.5 rounded-xl font-bold text-sm text-white">RESERVE</button>
+            <button onclick="remoteDigit('1')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">1</button>
+            <button onclick="remoteDigit('2')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">2</button>
+            <button onclick="remoteDigit('3')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">3</button>
+            <button onclick="remoteDigit('4')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">4</button>
+            <button onclick="remoteDigit('5')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">5</button>
+            <button onclick="remoteDigit('6')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">6</button>
+            <button onclick="remoteDigit('7')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">7</button>
+            <button onclick="remoteDigit('8')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">8</button>
+            <button onclick="remoteDigit('9')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">9</button>
+            <button onclick="remoteClear()" class="glass-pill py-3.5 rounded-2xl font-semibold text-sm text-rose-300">CLR</button>
+            <button onclick="remoteDigit('0')" class="glass-pill py-3.5 rounded-2xl font-bold text-lg">0</button>
+            <button onclick="remoteReserve()" class="glass-btn-primary py-3.5 rounded-2xl font-bold text-sm text-white">RESERVE</button>
           </div>
         </div>
         <div class="md:col-span-7 glass rounded-3xl p-5 flex flex-col gap-4">
           <h2 class="font-bold text-lg text-white">Playback &amp; Reaction Deck</h2>
           <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            <button onclick="togglePlay()" class="glass-pill py-3 rounded-xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="play" class="w-4 h-4 text-sky-300"></i>Play/Pause</button>
-            <button onclick="skipSong()" class="glass-pill py-3 rounded-xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="skip-forward" class="w-4 h-4 text-sky-300"></i>Skip</button>
-            <button onclick="replaySong()" class="glass-pill py-3 rounded-xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="rotate-ccw" class="w-4 h-4 text-sky-300"></i>Replay</button>
-            <button onclick="stopSong()" class="glass-pill py-3 rounded-xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="square" class="w-4 h-4 text-rose-300"></i>Stop</button>
-            <button onclick="toggleMelody()" class="glass-pill py-3 rounded-xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="music" class="w-4 h-4 text-fuchsia-300"></i>Melody</button>
-            <button onclick="triggerScoreReveal()" class="glass-pill py-3 rounded-xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-amber-300"></i>Score</button>
+            <button onclick="togglePlay()" class="glass-pill py-3 rounded-2xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="play" class="w-4 h-4 text-sky-300"></i>Play/Pause</button>
+            <button onclick="skipSong()" class="glass-pill py-3 rounded-2xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="skip-forward" class="w-4 h-4 text-sky-300"></i>Skip</button>
+            <button onclick="replaySong()" class="glass-pill py-3 rounded-2xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="rotate-ccw" class="w-4 h-4 text-sky-300"></i>Replay</button>
+            <button onclick="stopSong()" class="glass-pill py-3 rounded-2xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="square" class="w-4 h-4 text-rose-300"></i>Stop</button>
+            <button onclick="toggleMelody()" class="glass-pill py-3 rounded-2xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="music" class="w-4 h-4 text-fuchsia-300"></i>Melody</button>
+            <button onclick="triggerScoreReveal()" class="glass-pill py-3 rounded-2xl text-xs font-semibold flex flex-col items-center gap-1"><i data-lucide="award" class="w-4 h-4 text-amber-300"></i>Score</button>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="glass-strong rounded-2xl p-4 flex flex-col gap-2">
@@ -627,7 +601,7 @@
               <h2 class="font-bold text-lg text-white">Mic Check &amp; Voice FX</h2>
               <p class="text-xs text-slate-300">Adjust mic gain, echo, reverb, and live pitch detection</p>
             </div>
-            <button id="btnMicSettings" class="glass-btn-primary px-4 py-2 rounded-xl text-xs font-semibold text-white">Enable Mic</button>
+            <button id="btnMicSettings" class="glass-btn-primary px-4 py-2 rounded-full text-xs font-semibold text-white">Enable Mic</button>
           </div>
           <div class="glass-strong rounded-2xl p-3">
             <div class="flex justify-between text-xs text-slate-300 mb-1.5">
@@ -653,33 +627,45 @@
             </div>
           </div>
         </div>
+
         <div class="glass rounded-3xl p-5 flex flex-col gap-4">
-          <h2 class="font-bold text-lg text-white">Lyrics &amp; Scoring Settings</h2>
+          <div class="flex items-center justify-between">
+            <h2 class="font-bold text-lg text-white">Studio Equalizer &amp; Display</h2>
+            <select id="eqPresetSelect" onchange="applyEqPreset(this.value)" class="bg-slate-900/80 border border-white/20 rounded-full px-3 py-1 text-xs text-sky-200 focus:outline-none">
+              <option value="flat">Preset: Flat</option>
+              <option value="karaoke">Preset: Karaoke Vocal</option>
+              <option value="bass">Preset: Bass Boost</option>
+              <option value="concert">Preset: Concert Hall</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-5 gap-2 glass-strong rounded-2xl p-3 text-center text-[11px]">
+            <div><div class="text-slate-300 mb-1">60Hz</div><input type="range" min="-12" max="12" value="0" oninput="setEqBand(0, this.value)" class="eq-band glass-range w-full" /><div id="eqVal0" class="font-mono text-sky-300 mt-1">0dB</div></div>
+            <div><div class="text-slate-300 mb-1">230Hz</div><input type="range" min="-12" max="12" value="0" oninput="setEqBand(1, this.value)" class="eq-band glass-range w-full" /><div id="eqVal1" class="font-mono text-sky-300 mt-1">0dB</div></div>
+            <div><div class="text-slate-300 mb-1">910Hz</div><input type="range" min="-12" max="12" value="0" oninput="setEqBand(2, this.value)" class="eq-band glass-range w-full" /><div id="eqVal2" class="font-mono text-sky-300 mt-1">0dB</div></div>
+            <div><div class="text-slate-300 mb-1">3.6kHz</div><input type="range" min="-12" max="12" value="0" oninput="setEqBand(3, this.value)" class="eq-band glass-range w-full" /><div id="eqVal3" class="font-mono text-sky-300 mt-1">0dB</div></div>
+            <div><div class="text-slate-300 mb-1">14kHz</div><input type="range" min="-12" max="12" value="0" oninput="setEqBand(4, this.value)" class="eq-band glass-range w-full" /><div id="eqVal4" class="font-mono text-sky-300 mt-1">0dB</div></div>
+          </div>
           <div>
             <div class="flex justify-between text-xs text-slate-300 mb-1"><span>Lyric Font Size</span><span id="lyricSizeLabel" class="font-mono text-sky-200">28px</span></div>
             <input id="lyricSizeSlider" type="range" min="20" max="44" value="28" class="glass-range w-full" />
           </div>
-          <div>
-            <div class="text-xs text-slate-300 mb-2">Lyric Highlight Color</div>
-            <div class="flex items-center gap-2.5">
-              <button onclick="setLyricColor('#38bdf8')" class="w-8 h-8 rounded-full bg-sky-400 border-2 border-white/60"></button>
-              <button onclick="setLyricColor('#e879f9')" class="w-8 h-8 rounded-full bg-fuchsia-400 border-2 border-white/60"></button>
-              <button onclick="setLyricColor('#34d399')" class="w-8 h-8 rounded-full bg-emerald-400 border-2 border-white/60"></button>
-              <button onclick="setLyricColor('#fbbf24')" class="w-8 h-8 rounded-full bg-amber-400 border-2 border-white/60"></button>
-              <button onclick="setLyricColor('#fb7185')" class="w-8 h-8 rounded-full bg-rose-400 border-2 border-white/60"></button>
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-300">Lyric Highlight Color</span>
+            <div class="flex items-center gap-2">
+              <button onclick="setLyricColor('#38bdf8')" class="w-7 h-7 rounded-full bg-sky-400 border-2 border-white/60"></button>
+              <button onclick="setLyricColor('#e879f9')" class="w-7 h-7 rounded-full bg-fuchsia-400 border-2 border-white/60"></button>
+              <button onclick="setLyricColor('#34d399')" class="w-7 h-7 rounded-full bg-emerald-400 border-2 border-white/60"></button>
+              <button onclick="setLyricColor('#fbbf24')" class="w-7 h-7 rounded-full bg-amber-400 border-2 border-white/60"></button>
+              <button onclick="setLyricColor('#fb7185')" class="w-7 h-7 rounded-full bg-rose-400 border-2 border-white/60"></button>
             </div>
           </div>
-          <div class="flex items-center justify-between glass-pill rounded-xl px-3.5 py-2.5">
+          <div class="flex items-center justify-between glass-pill rounded-2xl px-3.5 py-2.5">
             <span class="text-xs text-slate-200 font-medium">Scoring Mode</span>
             <select id="scoringModeSelect" class="bg-slate-900/80 border border-white/20 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none">
               <option value="voice">Voice / Pitch + Rhythm</option>
               <option value="simple">Simple Fun Score</option>
               <option value="off">Off</option>
             </select>
-          </div>
-          <div class="glass-strong rounded-2xl p-3 text-xs text-slate-300 flex items-center justify-between">
-            <span>Audio Engine Status</span>
-            <span id="diagStatus" class="text-emerald-300 font-semibold">WebAudio Synth Ready</span>
           </div>
         </div>
       </div>
@@ -701,8 +687,8 @@
         <span>Tier: <b id="scoreTierLabel" class="text-amber-300">--</b></span>
       </div>
       <div class="flex items-center gap-2.5 w-full">
-        <button onclick="downloadScoreCard()" class="glass-pill flex-1 py-2.5 rounded-xl text-xs font-semibold text-white">Save Score Card</button>
-        <button onclick="closeScoreModal()" class="glass-btn-primary flex-1 py-2.5 rounded-xl text-xs font-semibold text-white">Continue</button>
+        <button onclick="downloadScoreCard()" class="glass-pill flex-1 py-2.5 rounded-full text-xs font-semibold text-white">Save Score Card</button>
+        <button onclick="closeScoreModal()" class="glass-btn-primary flex-1 py-2.5 rounded-full text-xs font-semibold text-white">Continue</button>
       </div>
     </div>
   </div>
@@ -728,7 +714,7 @@
           <span id="importLrcName" class="text-fuchsia-300 font-semibold">Optional</span>
         </label>
       </div>
-      <button onclick="handleImportSong()" class="glass-btn-primary py-2.5 rounded-xl text-xs font-semibold text-white">Add to Songbook</button>
+      <button onclick="handleImportSong()" class="glass-btn-primary py-2.5 rounded-full text-xs font-semibold text-white">Add to Songbook</button>
     </div>
   </div>
 
